@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+enum Role {
+  USER
+  BUSINESS_OWNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+// ─── USER ────────────────────────────────────────────────
+model User {
+  id           Int       @id @default(autoincrement())
+  telegramId   String?   @unique
+  firstName    String
+  lastName     String?
+  phone        String?   @unique
+  email        String?   @unique
+  passwordHash String?
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  businesses   Business[]
+  bookings     Booking[]
+}
+
+// ─── SERVICE CATEGORY ────────────────────────────────────
+model ServiceCategory {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  nameUz      String?
+  nameRu      String?
+  icon        String?
+  slug        String     @unique
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  businesses  Business[]
+}
+
+// ─── BUSINESS ────────────────────────────────────────────
+model Business {
+  id            Int              @id @default(autoincrement())
+  ownerId       Int
+  categoryId    Int
+  name          String
+  description   String?
+  phone         String?
+  address       String
+  city          String           @default("Tashkent")
+  latitude      Float
+  longitude     Float
+  logo          String?
+  photos        String[]
+  workingHours  Json?
+  isActive      Boolean          @default(true)
+  isVerified    Boolean          @default(false)
+  rating        Float            @default(0)
+  reviewCount   Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  owner         User             @relation(fields: [ownerId], references: [id])
+  category      ServiceCategory  @relation(fields: [categoryId], references: [id])
+  services      Service[]
+  bookings      Booking[]
+}
+
+// ─── SERVICE ─────────────────────────────────────────────
+model Service {
+  id          Int       @id @default(autoincrement())
+  businessId  Int
+  name        String
+  description String?
+  price       Float
+  duration    Int?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  business    Business  @relation(fields: [businessId], references: [id])
+  bookings    Booking[]
+}
+
+// ─── BOOKING ─────────────────────────────────────────────
+model Booking {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  businessId    Int
+  serviceId     Int
+  scheduledAt   DateTime
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  totalPrice    Float
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  business      Business      @relation(fields: [businessId], references: [id])
+  service       Service       @relation(fields: [serviceId], references: [id])
+}
