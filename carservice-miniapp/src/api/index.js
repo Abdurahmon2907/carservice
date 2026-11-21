@@ -3,7 +3,7 @@ import client from './client';
 export const getCategories = () =>
   client.get('/categories').then((r) => r.data.data);
 
-export const getBusinessesNearby = (lat, lng, categoryId, radius = 50) =>
+export const getBusinessesNearby = (lat, lng, categoryId, radius = 10) =>
   client
     .get('/businesses/nearby', { params: { lat, lng, categoryId, radius } })
     .then((r) => r.data.data);
