@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const isPhone = window.Telegram?.WebApp?.initData;
-
+// Dev (npm run dev): Vite proxies /api to localhost:3000.
+// Production build (Vercel): call the Railway backend directly.
 const client = axios.create({
-  baseURL: isPhone
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : '/api',
+  baseURL: import.meta.env.DEV
+    ? '/api'
+    : `${import.meta.env.VITE_API_URL}/api`,
   timeout: 10000,
 });
 

@@ -13,7 +13,8 @@ const app = express();
 
 // ─── Middleware ───────────────────────────────────────────
 app.use(helmet());          // security headers
-app.use(cors());            // allow frontend requests
+// CORS_ORIGIN = comma-separated allowed sites (e.g. the Vercel URL); unset = allow all
+app.use(cors({ origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true }));
 app.use(morgan('dev'));      // request logging
 app.use(express.json());    // parse JSON body
 
